@@ -51,10 +51,8 @@ impl Pipeline {
         // Create a new GStreamer pipeline that captures from the default video source, which is
         // usually a camera, converts the output to RGB if needed and then passes it to a GTK video
         // sink
-        // TODO: Redo
         let pipeline = gst::parse_launch(
-            "videotestsrc ! tee name=tee ! autovideosink name=sink",
-            // autovideosrc ! tee name=tee ! queue ! videoconvert ! autovideosink
+            "ksvideosrc device-index=1 ! video/x-raw,width=1920, height=1080 ! tee name=tee ! videoconvert ! autovideosink name=sink",
         )?;
 
         // Upcast to a gst::Pipeline as the above function could've also returned an arbitrary
