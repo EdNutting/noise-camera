@@ -7,5 +7,10 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
-gstreamer = "0.16.2"
+glib = "0.8"
+gst = { package = "gstreamer", version = "0.14" }
+gst-video = { package = "gstreamer-video", version = "0.14" }
+fragile = "0.3"
+serde = "1.0"
+serde_any = "0.5"
+chrono = "0.4"

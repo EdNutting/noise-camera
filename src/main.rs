@@ -1,46 +1,22 @@
-extern crate gstreamer as gst;
-use gst::prelude::*;
+#[macro_use]
+mod macros;
+mod app;
+mod pipeline;
+mod settings;
+mod utils;
 
-fn tutorial_main() {
-    // Initialize GStreamer
-    gst::init().unwrap();
+use std::error;
 
-    // Build the pipeline
-    let uri =
-        "https://www.freedesktop.org/software/gstreamer-sdk/data/media/sintel_trailer-480p.webm";
-    let pipeline = gst::parse_launch(&format!("playbin uri={}", uri)).unwrap();
+use crate::app::App;
 
-    // Start playing
-    pipeline
-        .set_state(gst::State::Playing)
-        .expect("Unable to set the pipeline to the `Playing` state");
+// Unique application name to identify it
+//
+// This is used for ensuring that there's only ever a single instance of our application
+pub const APPLICATION_NAME: &str = "com.github.gtk-rs.cameraview";
 
-    // Wait until error or EOS
-    let bus = pipeline.get_bus().unwrap();
-    for msg in bus.iter_timed(gst::CLOCK_TIME_NONE) {
-        use gst::MessageView;
+fn main() -> Result<(), Box<dyn error::Error>> {
+    // Initialize GStreamer. This checks, among other things, what plugins are available
+    gst::init()?;
 
-        match msg.view() {
-            MessageView::Eos(..) => break,
-            MessageView::Error(err) => {
-                println!(
-                    "Error from {:?}: {} ({:?})",
-                    err.get_src().map(|s| s.get_path_string()),
-                    err.get_error(),
-                    err.get_debug()
-                );
-                break;
-            }
-            _ => (),
-        }
-    }
-
-    // Shutdown pipeline
-    pipeline
-        .set_state(gst::State::Null)
-        .expect("Unable to set the pipeline to the `Null` state");
-}
-
-fn main() {
-    tutorial_main();
+    Ok(())
 }
