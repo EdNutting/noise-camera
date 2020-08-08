@@ -143,7 +143,7 @@ pub enum Action {
 }
 
 impl App {
-  fn new() -> Result<App, Box<dyn error::Error>> {
+  pub fn new() -> Result<App, Box<dyn error::Error>> {
     // Create the pipeline and if that fail return
     let pipeline = Pipeline::new().map_err(|err| format!("Error creating pipeline: {:?}", err))?;
 
@@ -167,7 +167,7 @@ impl App {
 
   // Called on the first application instance whenever the first application instance is started,
   // or any future second application instance
-  fn on_activate(&self) {
+  pub fn on_activate(&self) {
     // Once the UI is shown, start the GStreamer pipeline. If
     // an error happens, we immediately shut down
     if let Err(err) = self.pipeline.start() {
@@ -176,7 +176,7 @@ impl App {
   }
 
   // Called when the application shuts down. We drop our app struct here
-  fn on_shutdown(self) {
+  pub fn on_shutdown(self) {
     // This might fail but as we shut down right now anyway this doesn't matter
     // TODO: If a recording is currently running we would like to finish that first
     // before quitting the pipeline and shutting down the pipeline.
@@ -185,7 +185,7 @@ impl App {
 
   // When the record button is clicked it triggers the record action, which will call this.
   // We have to start or stop recording here
-  fn on_record_state_changed(&self, new_state: RecordState) {
+  pub fn on_record_state_changed(&self, new_state: RecordState) {
     // Start/stop recording based on button active'ness
     match new_state {
       RecordState::Recording => {

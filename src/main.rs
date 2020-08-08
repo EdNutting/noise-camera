@@ -6,6 +6,7 @@ mod settings;
 mod utils;
 
 use std::error;
+use std::io::stdin;
 
 use crate::app::App;
 
@@ -16,7 +17,16 @@ pub const APPLICATION_NAME: &str = "com.github.gtk-rs.cameraview";
 
 fn main() -> Result<(), Box<dyn error::Error>> {
     // Initialize GStreamer. This checks, among other things, what plugins are available
-    gst::init()?;
+    gst::init().unwrap();
+
+    let app = App::new().unwrap();
+    app.on_activate();
+
+    println!("\n------------------\nPress any key to exit...");
+    let mut line = String::new();
+    stdin().read_line(&mut line).expect("");
+
+    app.on_shutdown();
 
     Ok(())
 }

@@ -53,7 +53,8 @@ impl Pipeline {
         // sink
         // TODO: Redo
         let pipeline = gst::parse_launch(
-            "autovideosrc ! tee name=tee ! queue ! videoconvert ! gtksink name=sink",
+            "videotestsrc ! tee name=tee ! autovideosink name=sink",
+            // autovideosrc ! tee name=tee ! queue ! videoconvert ! autovideosink
         )?;
 
         // Upcast to a gst::Pipeline as the above function could've also returned an arbitrary
