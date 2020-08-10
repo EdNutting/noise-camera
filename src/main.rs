@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let app = App::new().unwrap();
     app.on_activate();
 
-    println!("\n------------------\nPress any key to exit...");
+    println!("\n------------------\nPress enter key to exit...");
     let mut line = String::new();
     stdin().read_line(&mut line).expect("");
 

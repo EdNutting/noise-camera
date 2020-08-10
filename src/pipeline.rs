@@ -1,6 +1,7 @@
 use glib;
 use gst::{self, prelude::*};
 use gst_video;
+use gst::PadMode;
 
 use std::cell::RefCell;
 use std::error;
@@ -52,7 +53,16 @@ impl Pipeline {
         // usually a camera, converts the output to RGB if needed and then passes it to a GTK video
         // sink
         let pipeline = gst::parse_launch(
-            "ksvideosrc device-index=1 ! video/x-raw,width=1920, height=1080 ! tee name=tee ! videoconvert ! autovideosink name=sink",
+            "ksvideosrc device-index=0
+              ! queue2 ring-buffer-max-size=200000 use-buffering=true
+                       temp-template=./videos/vid-XXXXXX.tmp
+                       name=queue2
+              ! tee name=tee
+              ! queue
+              ! clockoverlay halignment=right valignment=bottom shaded-background=true font-desc=\"Sans, 24\"
+              ! videoconvert
+              ! fakesink name=sink can-activate-pull=true can-activate-push=false"
+              // autovideosink name=sink
         )?;
 
         // Upcast to a gst::Pipeline as the above function could've also returned an arbitrary
@@ -69,25 +79,10 @@ impl Pipeline {
         let tee = pipeline.get_by_name("tee").expect("No tee found");
         let sink = pipeline.get_by_name("sink").expect("No sink found");
 
-        // XXX: Workaround for a bug on macOS
-        //
-        // When recording is started, the source could potentially reconfigure itself.
-        // Unfortunately this causes the camera source on macOS to fail completely instead.
-        // To prevent this we drop all Reconfigure events so that the source never tries to
-        // reconfigure.
-        {
-            let sinkpad = tee.get_static_pad("sink").expect("tee has no sinkpad");
-            sinkpad.add_probe(gst::PadProbeType::EVENT_UPSTREAM, |_pad, info| {
-                match info.data {
-                    Some(gst::PadProbeData::Event(ref ev))
-                        if ev.get_type() == gst::EventType::Reconfigure =>
-                    {
-                        gst::PadProbeReturn::Drop
-                    }
-                    _ => gst::PadProbeReturn::Ok,
-                }
-            });
-        }
+        // {
+        //     let sinkpad: gst::Pad = sink.get_static_pad("sink").expect("sink has no sinkpad");
+        //     sinkpad.activate_mode(PadMode::Pull, false).expect("pad mode to be set to pull");
+        // }
 
         let pipeline = Pipeline(Rc::new(PipelineInner {
             pipeline,
@@ -126,7 +121,9 @@ impl Pipeline {
 
     pub fn start(&self) -> Result<gst::StateChangeSuccess, gst::StateChangeError> {
         // This has no effect if called multiple times
-        self.pipeline.set_state(gst::State::Playing)
+        let result = self.pipeline.set_state(gst::State::Playing);
+
+        return result;
     }
 
     pub fn stop(&self) -> Result<gst::StateChangeSuccess, gst::StateChangeError> {

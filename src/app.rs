@@ -6,6 +6,7 @@ use std::error;
 use std::ops;
 use std::rc::{Rc, Weak};
 
+
 // Our refcounted application struct for containing all the state we have to carry around.
 //
 // This represents our main application window.
@@ -171,7 +172,7 @@ impl App {
     // Once the UI is shown, start the GStreamer pipeline. If
     // an error happens, we immediately shut down
     if let Err(err) = self.pipeline.start() {
-      panic!(format!("Failed to set pipeline to playing: {}", err));
+      panic!(format!("Failed to set pipeline to playing: {}",  err));
     }
   }
 
